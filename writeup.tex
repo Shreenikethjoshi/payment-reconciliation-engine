@@ -1,0 +1,83 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[margin=0.68in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% Professional neutral color palette
+\definecolor{primary}{RGB}{15, 23, 42}      % Deep Slate
+\definecolor{accent}{RGB}{30, 58, 138}      % Corporate Navy
+\definecolor{bodytext}{RGB}{51, 65, 85}     % Charcoal
+\definecolor{rulecolor}{RGB}{226, 232, 240} % Light Gray Divider
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accent,
+    urlcolor=accent
+}
+
+% Section formatting
+\titleformat{\section}
+  {\color{primary}\fontsize{11pt}{13pt}\bfseries}
+  {\thesection.}{0.4em}{}[\vspace{-0.3em}\color{rulecolor}\rule{\linewidth}{0.6pt}]
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+
+% Compact list formatting
+\setlist[itemize]{leftmargin=1.2em, itemsep=1.5pt, topsep=1.5pt}
+
+\pagestyle{empty}
+
+\begin{document}
+
+{\color{primary}\fontsize{14pt}{16pt}\bfseries Payment Reconciliation Engine: Design \& Verification}
+\vspace{1.5pt}
+
+{\color{bodytext}\fontsize{8.5pt}{10.5pt}\selectfont
+\textbf{Candidate Write-up} \quad$\vert$\quad \textbf{Domain}: Meesho D2C E-Commerce vs.\ Razorpay Batch Settlements \quad$\vert$\quad \textbf{Date}: November 2026
+}
+\vspace{4pt}
+\color{bodytext}\fontsize{9.2pt}{11.5pt}\selectfont
+
+\section{How the Matching Rules Were Chosen}
+Modern payment settlement operates asynchronously between an internal order ledger and external gateway batch files. Our rules were designed around two goals: \textbf{deterministic speed for clean rows} and \textbf{strict physical boundaries before scoring fuzzy rows}.
+
+\begin{itemize}
+    \item \textbf{Pass 1 (Exact Match, $O(1)$ Hash Map)}: Clears the vast majority ($\sim$97.5\%) of transactions by matching normalized reference IDs (\texttt{ref.strip().upper()}) and exact integer paise gross amounts. Consuming matched IDs into an in-memory set enforces strict one-to-one pairing, preventing double-crediting.
+    \item \textbf{Pass 2 (Candidate Blocking \& Hard Constraints)}: Comparing 40,000 ledger rows against 40,000 settlements directly is an $O(N^2)$ operation that risks random collisions. We partition settlements into calendar buckets, restricting candidates to a $\pm 5$-day blocking window, a maximum settlement delay of 3 days, and gross amount variance $\le 20\%$.
+    \item \textbf{Composite Scoring Function}: Surviving candidates are evaluated via:
+    $$\text{Composite Score} = 0.50 \cdot S_{\text{ref}} + 0.20 \cdot S_{\text{date}} + 0.30 \cdot S_{\text{amount}}$$
+    where $S_{\text{ref}}$ uses RapidFuzz token sorting to remain resilient against whitespace variations and prefix tags.
+    \item \textbf{The Numeric Suffix Penalty}: High-entropy sequence IDs (e.g., \texttt{pay\_QkX101} vs \texttt{pay\_QkX102}) share $>90\%$ token similarity. To prevent cross-customer false matches during flash sales, we subtract 15 points whenever IDs share an 8+ character prefix and differ only in trailing digits. Scores $\ge 90$ auto-reconcile, $70$--$89$ are flagged for human review, and ties trigger an \texttt{AMBIGUOUS\_MATCH} guard.
+\end{itemize}
+
+\section{Errors the Matcher Got Wrong, and Why}
+Evaluating the engine against the independent ground-truth answer key (1,600 seeded errors across 40,000 rows) highlighted predictable real-world edge cases:
+
+\begin{itemize}
+    \item \textbf{Truncated References with Common Denominations}: When customers purchase items at standard price points (e.g., \rupee 499) on the same day and their payment IDs suffer severe character truncation, fuzzy similarity hovers near 65--70\%. Choosing precision over speculative recall, the engine withheld automated matching to protect ledger integrity, yielding $\sim$79\% recall on reference mismatches.
+    \item \textbf{Window-Boundary Exclusions on Extreme Lag}: Orders delayed by more than 5 calendar days fall outside the blocking window. The engine labels them as \texttt{MISSING\_SETTLEMENT} rather than \texttt{LATE\_SETTLEMENT}. Expanding the window would recover these, but would disproportionately inflate false matches across identical repeating order values.
+    \item \textbf{Net vs.\ Gross Discrepancies}: Partial refunds deduct fees and payouts simultaneously. While our fee-netting logic caught 100\% of seeded refund confusions, tight refund amounts overlapping with separate standalone purchases require manual operator sign-off.
+\end{itemize}
+
+\section{How Reruns Are Made Safe (Idempotency)}
+Financial pipelines must support safe replays without corrupting balances or creating phantom duplicates:
+
+\begin{itemize}
+    \item \textbf{Relational Uniqueness}: Table schemas enforce primary keys on \texttt{txn\_id} and \texttt{settlement_id}. Ingestion uses \texttt{INSERT OR IGNORE}, making re-reads of the same source CSV a safe no-op. Results are guarded by a composite \texttt{UNIQUE(run\_id, txn\_id)} constraint.
+    \item \textbf{Cryptographic Result Fingerprinting}: All reconciled pairs are sorted deterministically and hashed into a SHA-256 digest (\texttt{result\_hash}). In automated tests, consecutive runs generated identical hashes (\texttt{770288ec58c...}) with 0 duplicate rows created.
+    \item \textbf{Append-Only Audit Trail}: Manual decisions made in the Streamlit Workbench write immutable audit entries to \texttt{exception\_resolutions}, leaving the raw ledger records untouched.
+\end{itemize}
+
+\section{What I Would Do Differently with More Time}
+With additional time, I would transition from fixed heuristic weights to a \textbf{Globally-Optimized Bipartite Matching Framework} (e.g., Jonker-Volgenant or Hungarian algorithm on cost matrices) paired with learned rail-specific priors:
+\begin{enumerate}
+    \item \textbf{Global vs.\ Greedy Assignment}: Current matching pairs candidates locally on a first-best basis. A global maximum-weight bipartite matching algorithm evaluates all candidate pairs simultaneously across the daily batch to maximize global reconciliation utility.
+    \item \textbf{Rail-Specific Error Models}: Error distributions differ across payment channels (UPI handles alphanumeric VPA typos; Cards face terminal STAN code drops; NetBanking introduces bank IFSC prefixes). Calibrating probabilistic feature weights per payment rail would further elevate reference mismatch recall without risking false positives.
+\end{enumerate}
+
+\end{document}

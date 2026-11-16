@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Reconciliation Report — RUN-20261116-53B43F</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f4f6fb;
+      color: #22283a;
+    }
+    header {
+      background: linear-gradient(90deg, #1a237e 0%, #283593 100%);
+      color: #fff;
+      padding: 28px 40px 18px;
+    }
+    header h1 { font-size: 1.7rem; font-weight: 700; }
+    header p  { font-size: 0.9rem; opacity: 0.8; margin-top: 4px; }
+
+    .cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding: 28px 40px 10px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+      padding: 22px 28px;
+      min-width: 190px;
+      flex: 1;
+    }
+    .card .label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+    .card .value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a237e;
+    }
+    .card .value.risk { color: #b71c1c; }
+    .card .sub {
+      font-size: 0.78rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .section {
+      margin: 18px 40px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      padding: 24px 28px;
+    }
+    .section h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1a237e;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #e8eaf6;
+      padding-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    thead tr { background: #e8eaf6; }
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 600;
+      color: #3949ab;
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f5f7ff; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-red    { background: #fde8e8; color: #b71c1c; }
+    .badge-orange { background: #fff3e0; color: #e65100; }
+    .badge-blue   { background: #e3f2fd; color: #0d47a1; }
+    .badge-green  { background: #e8f5e9; color: #1b5e20; }
+    .badge-grey   { background: #f3f4f6; color: #374151; }
+
+    .amounts { margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .amt-pill {
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+    }
+
+    footer {
+      background: #1a237e;
+      color: rgba(255,255,255,0.75);
+      padding: 16px 40px;
+      font-size: 0.8rem;
+      margin-top: 28px;
+    }
+    footer strong { color: #fff; }
+    .run-meta { display: flex; flex-wrap: wrap; gap: 24px; }
+    .run-meta div { line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>💳 Daily Reconciliation Report</h1>
+  <p>Generated on 2026-11-16 09:08:31 &nbsp;|&nbsp; Run: <strong>RUN-20261116-53B43F</strong></p>
+</header>
+
+<!-- Summary Cards -->
+<div class="cards">
+  <div class="card">
+    <div class="label">Expected Transactions</div>
+    <div class="value">40,000</div>
+    <div class="sub">Internal ledger rows</div>
+  </div>
+  <div class="card">
+    <div class="label">Settlement Records</div>
+    <div class="value">39,900</div>
+    <div class="sub">From provider file</div>
+  </div>
+  <div class="card">
+    <div class="label">Matched</div>
+    <div class="value">39,200</div>
+    <div class="sub">Exact: 39,052 &nbsp;|&nbsp; Fuzzy: 148</div>
+  </div>
+  <div class="card">
+    <div class="label">Needs Review</div>
+    <div class="value">121</div>
+    <div class="sub">Ambiguous or unresolved</div>
+  </div>
+  <div class="card">
+    <div class="label">Unmatched</div>
+    <div class="value">1,058</div>
+    <div class="sub">No settlement found</div>
+  </div>
+  <div class="card">
+    <div class="label">💰 Money at Risk</div>
+    <div class="value risk">₹8,980,273.60</div>
+    <div class="sub">Across all exception types</div>
+  </div>
+</div>
+
+<!-- Amount Summary -->
+<div class="section">
+  <h2>Amount Summary</h2>
+  <div class="amounts">
+    <div class="amt-pill">📋 Expected &nbsp;<strong>₹266,451,998.50</strong></div>
+    <div class="amt-pill">📥 Gross Settled &nbsp;<strong>₹261,240,874.00</strong></div>
+    <div class="amt-pill">📤 Net Settled &nbsp;<strong>₹255,393,905.64</strong></div>
+    <div class="amt-pill">❌ Rejected Rows &nbsp;<strong>79,900</strong></div>
+  </div>
+</div>
+
+<!-- Exception Breakdown -->
+<div class="section">
+  <h2>Exception Breakdown</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Exception Type</th>
+        <th>Count</th>
+        <th>Amount at Risk (INR)</th>
+        <th>Category</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-grey">AMBIGUOUS_MATCH</span>
+          
+        </td>
+        <td>119</td>
+        <td>
+          
+            ₹1,035,346.00
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-orange">AMOUNT_MISMATCH</span>
+          
+        </td>
+        <td>306</td>
+        <td>
+          
+            ₹176,234.42
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-orange">DUPLICATE_SETTLEMENT</span>
+          
+        </td>
+        <td>200</td>
+        <td>
+          
+            ₹1,361,741.50
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-blue">LATE_SETTLEMENT</span>
+          
+        </td>
+        <td>350</td>
+        <td>
+          
+            <em style="color:#6b7280">— delayed funds —</em>
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-blue">Delayed</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-red">MISSING_SETTLEMENT</span>
+          
+        </td>
+        <td>219</td>
+        <td>
+          
+            ₹1,377,030.00
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-grey">PARTIAL_REFUND_CONFUSION</span>
+          
+        </td>
+        <td>100</td>
+        <td>
+          
+            ₹657,693.50
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-grey">REFERENCE_MISMATCH</span>
+          
+        </td>
+        <td>304</td>
+        <td>
+          
+            ₹1,920,149.00
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+      <tr>
+        <td>
+          
+            <span class="badge badge-red">UNMATCHED_SETTLEMENT</span>
+          
+        </td>
+        <td>379</td>
+        <td>
+          
+            ₹2,452,079.18
+          
+        </td>
+        <td>
+          
+            <span class="badge badge-red">At Risk</span>
+          
+        </td>
+      </tr>
+    
+    </tbody>
+  </table>
+</div>
+
+<!-- Run Info Footer -->
+<footer>
+  <div class="run-meta">
+    <div>
+      <strong>Run ID</strong><br>RUN-20261116-53B43F
+    </div>
+    <div>
+      <strong>Run Date</strong><br>2026-11-16
+    </div>
+    <div>
+      <strong>Ledger File Hash</strong><br>8bfa1756ab7d30213b759ec9ab0399f5642a3f24ebcb6b226621ae830dd68103
+    </div>
+    <div>
+      <strong>Settlement File Hash</strong><br>541c054749a6fbee00355dbbd2004e4a5d60055cf5e9c91281d0fe020cd8407b
+    </div>
+    <div>
+      <strong>Run Status</strong><br>RUNNING
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
