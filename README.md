@@ -107,7 +107,17 @@ pytest tests/ -v
 
 ---
 
-## Matching Strategy
+## Key Assumptions
+
+1. **Currency & Precision**: All transactions are denominated in Indian Rupees (INR) and stored as integer paise (1 INR = 100 paise) to prevent floating-point rounding errors.
+2. **Gateway Fee Structure**: Modeled after standard Razorpay fee schedules: 1.8% merchant discount rate (MDR) on gross order value plus 18% GST on the fee (`Net = Gross - Fee - GST`).
+3. **Settlement Timelines**: Standard turnaround times are T+1 calendar days for UPI transactions and T+2 calendar days for Cards and NetBanking. Settlements arriving beyond this window are flagged as `LATE_SETTLEMENT`.
+4. **One-to-One Allocation**: Each internal ledger order pairs with at most one primary gateway settlement. Consumed settlements cannot be reused, ensuring duplicate credits are flagged as `DUPLICATE_SETTLEMENT`.
+5. **Operational Scope**: Synthetic datasets span a 30-day window (November 2026) comprising 40,000 internal orders and 39,900 settlements with realistic gateway noise.
+
+---
+
+## Reconciliation Approach (Two-Pass Matcher)
 
 The engine utilizes a two-pass matching algorithm:
 
@@ -131,7 +141,7 @@ The engine utilizes a two-pass matching algorithm:
 
 ---
 
-## Seeded Error Types & Detection Performance
+## Results & Evaluation Benchmarks
 
 Evaluated against the independent `data/answer_key.csv` (1,600 seeded errors across 40,000 transactions):
 
