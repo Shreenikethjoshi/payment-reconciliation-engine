@@ -30,3 +30,6 @@ logs/*.jsonl
 Thumbs.db
 .idea/
 .vscode/
+
+# Submission archives
+*.zip
